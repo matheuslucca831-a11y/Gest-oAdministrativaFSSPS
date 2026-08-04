@@ -148,34 +148,41 @@ function criarBanco() {
 // componente. O comentário abaixo força o TypeScript a tratar `db` sempre
 // como Dexie, evitando erros de "Property does not exist on type {}".
 /** @type {import('dexie').default} */
-let instanciaUnica;
-
 function obterInstancia() {
-  // Garante que só existe UMA instância/conexão do Dexie em toda a aplicação,
-  // mesmo se '@/db' for importado várias vezes por módulos diferentes do bundle.
-  if (!instanciaUnica) {
-    instanciaUnica = criarBanco();
+function obterInstancia() {
+  // Guarda a instância no `window` (não numa variável de módulo) porque o
+  // Next.js pode empacotar este arquivo em mais de um "chunk" JS diferente
+  // (um por rota). Se isso acontecer, cada chunk teria sua PRÓPRIA cópia de
+  // uma variável de módulo — ou seja, o "singleton" não seria de verdade, e
+  // duas instâncias do Dexie tentariam criar o banco do zero ao mesmo tempo
+  // (é exatamente o tipo de corrida que causa NotFoundError só em bancos
+  // novos, nunca em bancos que já existem). `window` é sempre o mesmo objeto
+  // pra qualquer chunk, então garante uma única instância de verdade.
+  if (!window.__gestaoClinicaDb) {
+    const instancia = criarBanco();
 
     // Se outra aba/janela abrir uma versão mais nova, esta conexão precisa
     // fechar para não travar o upgrade dela.
-    instanciaUnica.on('versionchange', () => {
+    instancia.on('versionchange', () => {
       console.warn('[db] Outra janela está tentando atualizar o banco — fechando esta conexão.');
-      instanciaUnica.close();
+      instancia.close();
     });
 
     // Se esta conexão ficar bloqueada por outra aba/janela mais antiga que
     // ainda está aberta, avisa claramente em vez de falhar silenciosamente
     // numa versão desatualizada do schema.
-    instanciaUnica.on('blocked', () => {
+    instancia.on('blocked', () => {
       console.error('[db] Upgrade do banco bloqueado — feche outras janelas/abas do app e recarregue.');
     });
 
-    instanciaUnica.open().catch((err) => {
+    instancia.open().catch((err) => {
       console.error('[db] Falha ao abrir o banco:', err);
     });
+
+    window.__gestaoClinicaDb = instancia;
   }
 
-  return instanciaUnica;
+  return window.__gestaoClinicaDb;
 }
 
 export const db =
