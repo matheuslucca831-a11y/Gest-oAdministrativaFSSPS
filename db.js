@@ -145,7 +145,7 @@ function criarBanco() {
 // No servidor (build/SSR na Vercel), usa um "fake" que não quebra o import,
 // mas também não deve ser usado — as páginas que usam `db` precisam ser
 // client-only (ver instruções abaixo sobre next/dynamic com ssr: false).
-export const db: Dexie =
+export const db =
   typeof window !== 'undefined'
     ? criarBanco()
-    : ({} as Dexie);
+    : ({});
