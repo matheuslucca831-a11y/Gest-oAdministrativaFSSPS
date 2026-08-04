@@ -99,7 +99,7 @@ export default function PageProtocolos() {
             Nenhum protocolo encontrado no cache local.
           </div>
         ) : (
-          protocolosFiltrados.map((item) => (
+          protocolosFiltrados.map((item: any) => (
             <div 
               key={item.id}
               className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:border-blue-300 transition-all"
