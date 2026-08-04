@@ -59,7 +59,7 @@ export default function GerarSOS() {
           .where('ano').equals(anoAtual).toArray();
 
         if (registrosDoAno.length > 0) {
-          const numeros = registrosDoAno.map(r => parseInt(r.numeroOS, 10));
+          const numeros = registrosDoAno.map((r: any) => parseInt(r.numeroOS, 10));
           const proximo = Math.max(...numeros) + 1;
           setForm(prev => ({ ...prev, numeroOS: String(proximo).padStart(3, '0') }));
         } else {
