@@ -13,52 +13,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  
+
   useEffect(() => {
-    const corrigirDatasQuebradas = async () => {
-      // Roda só uma vez — depois disso, marca como feito e nunca mais roda de novo
-      const jaCorrigido = localStorage.getItem('fspss_correcao_datas_v1');
-      if (jaCorrigido === 'true') return;
-
-      try {
-        const tabelasParaVerificar = [
-          'encaminhamentos', 'exames', 'remessas', 'sos', 'pacientes',
-          'transferencias', 'profissionais', 'pedidos', 'materiais'
-        ];
-
-        for (const nomeTabela of tabelasParaVerificar) {
-          const registros = await (db as any).table(nomeTabela).toArray();
-
-          for (const registro of registros) {
-            let precisaCorrigir = false;
-            const registroCorrigido: any = { ...registro };
-
-            for (const chave in registroCorrigido) {
-              if (registroCorrigido[chave] instanceof Date) {
-                const d = registroCorrigido[chave] as Date;
-                const dia = String(d.getDate()).padStart(2, '0');
-                const mes = String(d.getMonth() + 1).padStart(2, '0');
-                const ano = d.getFullYear();
-                registroCorrigido[chave] = `${dia}/${mes}/${ano}`;
-                precisaCorrigir = true;
-              }
-            }
-
-            if (precisaCorrigir) {
-              await (db as any).table(nomeTabela).put(registroCorrigido);
-              console.log(`Corrigido registro na tabela ${nomeTabela}:`, registro.id ?? registro.cross);
-            }
-          }
-        }
-
-        localStorage.setItem('fspss_correcao_datas_v1', 'true');
-        console.log('Correção de datas concluída com sucesso.');
-      } catch (err) {
-        console.error('Erro ao corrigir datas quebradas:', err);
-      }
-    };
-
-    corrigirDatasQuebradas();
+    // 👇 corrigirDatasQuebradas foi removida temporariamente para isolar
+    // se ela é a causa do erro "NotFoundError" em bancos novos.
 
     const loadInitialData = async () => {
       if (typeof window !== 'undefined' && (window as any).require) {
