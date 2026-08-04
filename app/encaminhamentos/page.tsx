@@ -19,7 +19,7 @@ export default function Encaminhamentos() {
   const PROTOCOLOS_PADRAO = useMemo(() => {
     const mapa: Record<string, { sigla: string; checklist: string }> = {};
 
-    protocolosSupabase.forEach((item) => {
+    protocolosSupabase.forEach((item: any) => {
       if (item.nome) {
         mapa[item.nome.toUpperCase()] = {
           sigla: item.sigla || '',
