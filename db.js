@@ -180,6 +180,36 @@ function obterInstancia() {
           `[db] Banco aberto com sucesso. Versão: ${instancia.verno}. Tabelas (${instancia.tables.length}):`,
           instancia.tables.map((t) => t.name)
         );
+
+        // 👇 AUTOCORREÇÃO: confere se as tabelas existem DE VERDADE na
+        // conexão nativa do navegador (não só na lista que o Dexie acha
+        // que deveria existir, baseado no código). Se o banco estiver
+        // "zumbi" — versão já marcada como atual, mas sem nenhuma tabela
+        // física criada — apaga e recarrega a página automaticamente,
+        // uma única vez, pra forçar a recriação completa do zero.
+        const tabelasReais = instancia.backendDB().objectStoreNames;
+        const bancoZumbi = tabelasReais.length === 0 && instancia.tables.length > 0;
+
+        if (bancoZumbi) {
+          const jaTentouCorrigir = sessionStorage.getItem('fspss_db_autocorrecao');
+
+          if (!jaTentouCorrigir) {
+            console.error('[db] Banco detectado como "zumbi" (0 tabelas reais). Apagando e recarregando automaticamente...');
+            sessionStorage.setItem('fspss_db_autocorrecao', 'true');
+
+            instancia.close();
+            const req = indexedDB.deleteDatabase('GestaoClinicaFSPSS');
+            req.onsuccess = () => window.location.reload();
+            req.onerror = () => console.error('[db] Falha ao apagar o banco zumbi automaticamente.');
+            req.onblocked = () => console.error('[db] Exclusão automática bloqueada — feche outras abas do app e recarregue manualmente.');
+          } else {
+            console.error('[db] Banco continua "zumbi" mesmo após autocorreção — precisa de investigação manual.');
+          }
+        } else {
+          // Chegou aqui com tabelas reais confirmadas — limpa a flag de
+          // autocorreção pra não interferir em futuros problemas legítimos.
+          sessionStorage.removeItem('fspss_db_autocorrecao');
+        }
       })
       .catch((err) => {
         console.error('[db] FALHA AO ABRIR O BANCO. Nome do erro:', err && err.name);
