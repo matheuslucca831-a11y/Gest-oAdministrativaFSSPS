@@ -149,7 +149,6 @@ function criarBanco() {
 // como Dexie, evitando erros de "Property does not exist on type {}".
 /** @type {import('dexie').default} */
 function obterInstancia() {
-function obterInstancia() {
   // Guarda a instância no `window` (não numa variável de módulo) porque o
   // Next.js pode empacotar este arquivo em mais de um "chunk" JS diferente
   // (um por rota). Se isso acontecer, cada chunk teria sua PRÓPRIA cópia de
