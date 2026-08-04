@@ -174,9 +174,18 @@ function obterInstancia() {
       console.error('[db] Upgrade do banco bloqueado — feche outras janelas/abas do app e recarregue.');
     });
 
-    instancia.open().catch((err) => {
-      console.error('[db] Falha ao abrir o banco:', err);
-    });
+    instancia.open()
+      .then(() => {
+        console.log(
+          `[db] Banco aberto com sucesso. Versão: ${instancia.verno}. Tabelas (${instancia.tables.length}):`,
+          instancia.tables.map((t) => t.name)
+        );
+      })
+      .catch((err) => {
+        console.error('[db] FALHA AO ABRIR O BANCO. Nome do erro:', err && err.name);
+        console.error('[db] Mensagem completa:', err && err.message);
+        console.error('[db] Erro completo:', err);
+      });
 
     window.__gestaoClinicaDb = instancia;
   }
