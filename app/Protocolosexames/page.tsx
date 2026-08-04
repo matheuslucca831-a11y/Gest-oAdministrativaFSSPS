@@ -29,7 +29,7 @@ export default function PageProtocolos() {
 
 
   // Filtro de pesquisa rápida local (por nome ou sigla)
-  const protocolosFiltrados = protocolos.filter(p => 
+  const protocolosFiltrados = protocolos.filter((p: any) =>
     p.nome.toLowerCase().includes(busca.toLowerCase()) ||
     p.sigla.toLowerCase().includes(busca.toLowerCase())
   );
