@@ -168,7 +168,7 @@ export default function Configuracoes() {
           cell.alignment = { horizontal: 'center' };
         });
         const dados = await db.table(config.chave).toArray();
-        dados.forEach(item => ws.addRow(item));
+        dados.forEach((item: any) => ws.addRow(item));
       }
 
       const buffer = await workbook.xlsx.writeBuffer();
