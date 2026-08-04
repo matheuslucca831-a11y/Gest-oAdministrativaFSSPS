@@ -148,7 +148,37 @@ function criarBanco() {
 // componente. O comentário abaixo força o TypeScript a tratar `db` sempre
 // como Dexie, evitando erros de "Property does not exist on type {}".
 /** @type {import('dexie').default} */
+let instanciaUnica;
+
+function obterInstancia() {
+  // Garante que só existe UMA instância/conexão do Dexie em toda a aplicação,
+  // mesmo se '@/db' for importado várias vezes por módulos diferentes do bundle.
+  if (!instanciaUnica) {
+    instanciaUnica = criarBanco();
+
+    // Se outra aba/janela abrir uma versão mais nova, esta conexão precisa
+    // fechar para não travar o upgrade dela.
+    instanciaUnica.on('versionchange', () => {
+      console.warn('[db] Outra janela está tentando atualizar o banco — fechando esta conexão.');
+      instanciaUnica.close();
+    });
+
+    // Se esta conexão ficar bloqueada por outra aba/janela mais antiga que
+    // ainda está aberta, avisa claramente em vez de falhar silenciosamente
+    // numa versão desatualizada do schema.
+    instanciaUnica.on('blocked', () => {
+      console.error('[db] Upgrade do banco bloqueado — feche outras janelas/abas do app e recarregue.');
+    });
+
+    instanciaUnica.open().catch((err) => {
+      console.error('[db] Falha ao abrir o banco:', err);
+    });
+  }
+
+  return instanciaUnica;
+}
+
 export const db =
   typeof window !== 'undefined'
-    ? criarBanco()
+    ? obterInstancia()
     : ({});
