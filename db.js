@@ -143,8 +143,11 @@ function criarBanco() {
 
 // 👇 Só cria a instância real do Dexie no navegador.
 // No servidor (build/SSR na Vercel), usa um "fake" que não quebra o import,
-// mas também não deve ser usado — as páginas que usam `db` precisam ser
-// client-only (ver instruções abaixo sobre next/dynamic com ssr: false).
+// mas também não deve ser usado — as páginas que usam `db` precisam chamar
+// isso só dentro de useEffect/handlers (client-side), nunca no corpo do
+// componente. O comentário abaixo força o TypeScript a tratar `db` sempre
+// como Dexie, evitando erros de "Property does not exist on type {}".
+/** @type {import('dexie').default} */
 export const db =
   typeof window !== 'undefined'
     ? criarBanco()
