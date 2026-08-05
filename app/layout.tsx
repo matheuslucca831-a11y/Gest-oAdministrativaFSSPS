@@ -5,14 +5,19 @@ import Sidebar from '@/components/Sidebar';
 import ConfiguracaoInicial from '@/components/ConfiguracaoInicial';
 import React, { useEffect } from 'react';
 import { db } from '@/db';
+import { AvisosToast } from '@/components/AvisosToast';
+import { ModalProvider } from '@/components/ModalProvider'; // 👈 novo
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  
+
   useEffect(() => {
+    // 👇 corrigirDatasQuebradas foi removida temporariamente para isolar
+    // se ela é a causa do erro "NotFoundError" em bancos novos.
+
     const loadInitialData = async () => {
       if (typeof window !== 'undefined' && (window as any).require) {
         try {
@@ -44,17 +49,19 @@ export default function RootLayout({
   return (
     <html lang="pt-br">
       <body className="flex h-screen overflow-hidden bg-gray-50 m-0 p-0 print:block print:bg-white">
+        <ModalProvider>
+          <ConfiguracaoInicial />
 
-        <ConfiguracaoInicial />
+          <aside className="print:hidden flex-shrink-0 h-full">
+            <Sidebar />
+          </aside>
 
-        <aside className="print:hidden flex-shrink-0 h-full">
-          <Sidebar />
-        </aside>
+          <main className="flex-1 h-full overflow-y-auto print:block print:h-auto print:w-full print:p-0 print:overflow-visible">
+            {children}
+          </main>
 
-        <main className="flex-1 h-full overflow-y-auto print:block print:h-auto print:w-full print:p-0 print:overflow-visible">
-          {children}
-        </main>
-
+          <AvisosToast />
+        </ModalProvider>
       </body>
     </html>
   );
